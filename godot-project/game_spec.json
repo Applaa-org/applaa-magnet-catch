@@ -1,0 +1,47 @@
+{
+  "game": {
+    "name": "Magnet Catch",
+    "type": "2D",
+    "description": "A simple, slow-paced mobile-friendly game where a magnet at the bottom catches falling items. Metal items give +1 point, non-metal items give -1 point. No penalty for missed items. Items fall slowly over 2-3 seconds, keeping the game easy and never speeding up. Cute, colorful theme with rounded shapes and soft pastel colors. Score displayed at the top with simple animations.",
+    "genre": "puzzle",
+    "version": "1.0.0"
+  },
+  "settings": {
+    "window": {
+      "width": 800,
+      "height": 600
+    },
+    "physics": {
+      "enabled": true
+    },
+    "rendering": {}
+  },
+  "player": {
+    "name": "Magnet",
+    "type": "character",
+    "speed": 300
+  },
+  "items": [
+    {
+      "name": "Metal Item",
+      "type": "item",
+      "points": 1,
+      "fall_speed": 50
+    },
+    {
+      "name": "Non-Metal Item",
+      "type": "item",
+      "points": -1,
+      "fall_speed": 50
+    }
+  ],
+  "logic": {
+    "spawn_interval": 2.0,
+    "win_condition": "none",
+    "lose_condition": "none",
+    "scoring": {
+      "metal_item": 1,
+      "non_metal_item": -1
+    }
+  }
+}

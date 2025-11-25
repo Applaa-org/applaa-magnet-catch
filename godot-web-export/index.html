@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnet Catch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffe4e1 0%, #e0f6ff 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        #gameContainer {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: linear-gradient(135deg, #f0f8ff 0%, #fffacd 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a90e2;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        #magnet {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.1s ease;
+        }
+        .item {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            animation: fall 3s linear infinite;
+        }
+        .metal {
+            background: linear-gradient(45deg, #c0c0c0, #808080);
+        }
+        .non-metal {
+            background: linear-gradient(45deg, #ff69b4, #daa520);
+        }
+        @keyframes fall {
+            from { top: -30px; }
+            to { top: 600px; }
+        }
+        #leftBtn, #rightBtn {
+            position: absolute;
+            bottom: 20px;
+            width: 80px;
+            height: 60px;
+            background: linear-gradient(45deg, #4ade80, #22c55e);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+        #leftBtn:hover, #rightBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        #leftBtn:active, #rightBtn:active {
+            transform: scale(0.95);
+        }
+        #leftBtn {
+            left: 20px;
+        }
+        #rightBtn {
+            right: 20px;
+        }
+        @media (max-width: 768px) {
+            #gameContainer {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="score">Score: 0</div>
+        <div id="magnet"></div>
+        <button id="leftBtn">←</button>
+        <button id="rightBtn">→</button>
+    </div>
+    <script>
+        const gameContainer = document.getElementById('gameContainer');
+        const magnet = document.getElementById('magnet');
+        const scoreElement = document.getElementById('score');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+
+        let score = 0;
+        let magnetX = 400; // Center of 800px width
+        const magnetSpeed = 5;
+        const gameWidth = 800;
+        const gameHeight = 600;
+        let items = [];
+        let spawnTimer = 0;
+        const spawnInterval = 2000; // 2 seconds
+        let keys = {};
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Touch controls
+        leftBtn.addEventListener('touchstart', () => keys['ArrowLeft'] = true);
+        leftBtn.addEventListener('touchend', () => keys['ArrowLeft'] = false);
+        rightBtn.addEventListener('touchstart', () => keys['ArrowRight'] = true);
+        rightBtn.addEventListener('touchend', () => keys['ArrowRight'] = false);
+
+        // Mouse controls for desktop
+        leftBtn.addEventListener('mousedown', () => keys['ArrowLeft'] = true);
+        leftBtn.addEventListener('mouseup', () => keys['ArrowLeft'] = false);
+        rightBtn.addEventListener('mousedown', () => keys['ArrowRight'] = true);
+        rightBtn.addEventListener('mouseup', () => keys['ArrowRight'] = false);
+
+        function spawnItem() {
+            const item = document.createElement('div');
+            item.classList.add('item');
+            const isMetal = Math.random() < 0.5;
+            item.classList.add(isMetal ? 'metal' : 'non-metal');
+            item.isMetal = isMetal;
+            item.style.left = Math.random() * (gameWidth - 30) + 'px';
+            item.style.top = '-30px';
+            item.startTime = Date.now();
+            gameContainer.appendChild(item);
+            items.push(item);
+        }
+
+        function update() {
+            // Move magnet
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+                magnetX -= magnetSpeed;
+            }
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+                magnetX += magnetSpeed;
+            }
+            magnetX = Math.max(40, Math.min(gameWidth - 40, magnetX));
+            magnet.style.left = magnetX - 40 + 'px'; // Center the 80px wide magnet
+
+            // Spawn items
+            spawnTimer += 16; // ~60fps
+            if (spawnTimer >= spawnInterval) {
+                spawnItem();
+                spawnTimer = 0;
+            }
+
+            // Update items
+            items.forEach((item, index) => {
+                const elapsed = Date.now() - item.startTime;
+                const progress = elapsed / 3000; // 3 seconds
+                item.style.top = progress * (gameHeight + 30) - 30 + 'px';
+
+                // Check collision with magnet
+                const itemRect = item.getBoundingClientRect();
+                const magnetRect = magnet.getBoundingClientRect();
+                if (itemRect.bottom >= magnetRect.top &&
+                    itemRect.top <= magnetRect.bottom &&
+                    itemRect.right >= magnetRect.left &&
+                    itemRect.left <= magnetRect.right) {
+                    // Caught!
+                    if (item.isMetal) {
+                        score += 1;
+                    } else {
+                        score -= 1;
+                    }
+                    scoreElement.textContent = 'Score: ' + score;
+                    item.remove();
+                    items.splice(index, 1);
+                } else if (progress >= 1) {
+                    // Reached bottom, remove without penalty
+                    item.remove();
+                    items.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(update);
+        }
+
+        update();
+    </script>
+</body>
+</html>

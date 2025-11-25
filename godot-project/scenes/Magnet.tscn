@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://magnet_scene"]
+
+[ext_resource type="Script" path="res://scripts/Magnet.gd" id="1_magnet"]
+
+[node name="Magnet" type="CharacterBody2D"]
+script = ExtResource("1_magnet")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("PlaceholderTexture2D_12345")
+region_rect = Rect2(0, 0, 80, 40)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_67890")
+size = Vector2(80, 40)
